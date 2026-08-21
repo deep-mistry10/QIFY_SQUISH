@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQUISH — Image Compressor</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="page-skeleton" id="pageSkeleton" aria-hidden="true">
+  <div class="skeleton-shell">
+    <div class="skeleton-header">
+      <div class="skeleton-brand">
+        <div class="skeleton-mark skeleton-shimmer"></div>
+        <div class="skeleton-brand-name skeleton-shimmer"></div>
+      </div>
+      <div class="skeleton-privacy skeleton-shimmer"></div>
+    </div>
+    <div class="skeleton-intro">
+      <div class="skeleton-kicker skeleton-shimmer"></div>
+      <div class="skeleton-title skeleton-shimmer"></div>
+      <div class="skeleton-copy skeleton-shimmer"></div>
+      <div class="skeleton-copy short skeleton-shimmer"></div>
+    </div>
+    <div class="skeleton-workspace">
+      <div class="skeleton-workspace-head">
+        <div class="skeleton-label skeleton-shimmer"></div>
+        <div class="skeleton-label small skeleton-shimmer"></div>
+      </div>
+      <div class="skeleton-upload">
+        <div class="skeleton-upload-icon skeleton-shimmer"></div>
+        <div class="skeleton-upload-title skeleton-shimmer"></div>
+        <div class="skeleton-upload-sub skeleton-shimmer"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="wrapper">
+
+  <header>
+    <div class="brand">
+      <div class="brand-mark">
+        <img class="logotype" src="https://link.qify.site/img/fcefd2b167aa0e7a73e1f738a61158f412c2b613c2e3d6acc8e3a4843e96df4b.png" alt="QIFY logo">
+      </div>
+      <div class="brand-name">
+        QIFY <span class="brand-product">/ SQUISH</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+
+  <button
+    class="theme-toggle"
+    id="themeToggle"
+    type="button"
+    aria-label="Toggle dark mode"
+    title="Toggle theme"
+  >
+    <span class="theme-icon" id="themeIcon">☾</span>
+    <span class="theme-label" id="themeLabel">Dark</span>
+  </button>
+
+  <div class="privacy">
+    <span class="privacy-dot"></span>
+    processed locally
+  </div>
+
+</div>
+  </header>
+
+  <main>
+
+    <section class="intro">
+      <div class="kicker">
+        <span class="kicker-line"></span>
+        Image compression tool
+      </div>
+
+      <h1>Compress an image<br>to the size you need.</h1>
+
+      <p class="hero-copy">
+        Choose an image, set a target size and export a smaller copy.
+        Processing happens directly in your browser.
+      </p>
+    </section>
+
+    <section class="workspace">
+
+      <div class="workspace-head">
+        <span class="workspace-title">SQUISH</span>
+        <span class="workspace-meta">JPG · PNG · WEBP</span>
+      </div>
+
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" accept="image/*">
+
+        <span class="drop-icon">↓</span>
+
+        <div class="drop-title">
+          Choose an image to compress
+        </div>
+
+        <div class="drop-sub">
+          Drop a file here or click to browse
+        </div>
+      </div>
+
+      <div class="controls" id="controls">
+
+        <div class="file-info" id="fileInfo">
+          <img class="file-thumb" id="fileThumb" src="" alt="Selected image preview">
+
+          <div class="file-details">
+            <div class="file-name" id="fileName">—</div>
+            <div class="file-meta" id="fileMeta">—</div>
+          </div>
+        </div>
+
+        <div class="minimum-size" id="minimumSizeBox">
+          <div class="minimum-size-copy">
+            <div class="minimum-size-label">Minimum achievable</div>
+            <div class="minimum-size-text" id="minimumSizeText">
+              Checking the browser encoder...
+            </div>
+          </div>
+          <div class="minimum-size-value" id="minimumSizeValue">
+            <span class="minimum-size-loading">checking…</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Target file size</div>
+
+          <div class="target-row">
+            <div class="input-group">
+              <input
+                type="number"
+                id="targetSize"
+                placeholder="100"
+                min="1"
+                max="999999"
+                aria-label="Target file size"
+              >
+              <span class="input-unit" id="unitLabel">KB</span>
+            </div>
+
+            <div class="unit-toggle">
+              <button class="unit-btn active" id="btnKB" onclick="setUnit('KB')" type="button">KB</button>
+              <button class="unit-btn" id="btnMB" onclick="setUnit('MB')" type="button">MB</button>
+            </div>
+          </div>
+
+          <div class="quick-targets" id="quickTargets" aria-label="Quick target sizes">
+            <button class="quick-target" type="button" data-size="50" onclick="setQuickTarget(50)">50 KB</button>
+            <button class="quick-target" type="button" data-size="100" onclick="setQuickTarget(100)">100 KB</button>
+            <button class="quick-target" type="button" data-size="200" onclick="setQuickTarget(200)">200 KB</button>
+            <button class="quick-target" type="button" data-size="500" onclick="setQuickTarget(500)">500 KB</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Output format</div>
+
+          <div class="format-row">
+            <button class="fmt-btn active" data-fmt="image/jpeg" onclick="setFormat(this)" type="button">JPEG</button>
+            <button class="fmt-btn" data-fmt="image/webp" onclick="setFormat(this)" type="button">WEBP</button>
+            <button class="fmt-btn" data-fmt="image/png" onclick="setFormat(this)" type="button">PNG</button>
+          </div>
+
+          <div
+            class="status-box info"
+            id="pngNote"
+            style="display:none;margin-top:10px;"
+          >
+            PNG is lossless, so exact target-size control is limited.
+          </div>
+        </div>
+
+        <button
+          class="compress-btn"
+          id="compressBtn"
+          onclick="compress()"
+          type="button"
+        >
+          Compress image
+        </button>
+
+        <div class="progress-wrap" id="progressWrap">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressBar"></div>
+          </div>
+
+          <div class="progress-label" id="progressLabel">
+            Working...
+          </div>
+        </div>
+
+        <div
+          class="status-box"
+          id="statusBox"
+          role="status"
+          aria-live="polite"
+        ></div>
+
+        <div class="result-card" id="resultCard">
+
+          <div class="card-title">Result</div>
+
+          <div class="result-stats">
+
+            <div class="stat">
+              <div class="stat-val" id="statBefore">—</div>
+              <div class="stat-lbl">Original</div>
+            </div>
+
+            <div class="stat">
+              <div class="stat-val" id="statAfter">—</div>
+              <div class="stat-lbl">Compressed</div>
+            </div>
+
+            <div class="stat">
+              <div class="stat-val" id="statSaved">—</div>
+              <div class="stat-lbl">Saved</div>
+            </div>
+
+          </div>
+
+          <a
+            class="download-btn"
+            id="downloadBtn"
+            href="#"
+            download
+          >
+            ↓ Download image
+          </a>
+
+          <button
+            class="reset-btn"
+            onclick="resetTool()"
+            type="button"
+          >
+            Compress another image
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <span><strong>SQUISH</strong> by QIFY</span>
+    <span>Files are processed locally</span>
+  </footer>
+
+</div>
+
+<canvas id="canvas"></canvas>
+
+<script src="app.js"></script>
+</body>
+</html>
