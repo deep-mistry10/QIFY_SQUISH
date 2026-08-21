@@ -13,13 +13,6 @@ A lightweight client-side image compressor by **QIFY** that lets you target a fi
 [![JavaScript](https://img.shields.io/badge/JavaScript-111111?style=flat-square&logo=javascript&logoColor=F7DF1E)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![Client Side](https://img.shields.io/badge/Processing-Client--Side-111111?style=flat-square)](#privacy)
 
-<br>
-
-[Overview](#overview) ·
-[Features](#features) ·
-[How It Works](#how-it-works) ·
-[Usage](#usage) ·
-[Development](#development)
 
 </div>
 
