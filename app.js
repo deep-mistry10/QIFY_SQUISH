@@ -95,6 +95,7 @@ let originalDataURL = null;
 let currentUnit = 'KB';
 let currentFormat = 'image/jpeg';
 let minimumSizeToken = 0;
+let currentDownloadURL = null;
 
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
@@ -183,6 +184,22 @@ async function updateMinimumSize() {
 }
 
 function loadFile(file) {
+
+  const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
+
+  if (!file || !file.type.startsWith('image/')) {
+    showStatus('error', '✗ Please select a valid image file.');
+    return;
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    showStatus(
+      'error',
+      `✗ File is too large. Maximum allowed size is 50 MB.`
+    );
+    return;
+  }
+
   originalFile = file;
   const reader = new FileReader();
   reader.onload = e => {
@@ -269,8 +286,24 @@ async function compress() {
   try {
     const img = await loadImage(originalDataURL);
     const canvas = document.getElementById('canvas');
-    canvas.width = img.naturalWidth;
-    canvas.height = img.naturalHeight;
+    const MAX_DIMENSION = 4096;
+
+let width = img.naturalWidth;
+let height = img.naturalHeight;
+
+if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+  const scale = Math.min(
+    MAX_DIMENSION / width,
+    MAX_DIMENSION / height
+  );
+
+  width = Math.round(width * scale);
+  height = Math.round(height * scale);
+}
+
+canvas.width = width;
+canvas.height = height;
+
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, 0, 0);
@@ -280,9 +313,9 @@ async function compress() {
       const blob = await toBlob(canvas, 'image/png', 1);
       if (blob.size > targetBytes) {
         showStatus('warn',
-          `⚠ Cannot reach ${fmt(targetBytes)} with PNG — PNG is lossless.\n` +
-          `Smallest PNG possible: ${fmt(blob.size)} (${fmt(blob.size - targetBytes)} over target).\n` +
-          `Switch to JPEG or WEBP for precise size control.`
+          `⚠ PNG cannot guarantee the target size because PNG is lossless.\n` +
+`Result: ${fmt(blob.size)}\n` +
+`For precise target-size compression, use JPEG or WEBP.`
         );
       } else {
         showStatus('success', `✓ PNG exported at ${fmt(blob.size)} — within your target.`);
@@ -308,11 +341,12 @@ async function compress() {
 
     if (!bestBlob) {
       const minBlob = await toBlob(canvas, currentFormat, 0.01);
-      showStatus('error',
-        `✗ Cannot compress to ${fmt(targetBytes)}.\n` +
-        `Minimum achievable size is ~${fmt(minBlob.size)} at lowest quality.\n` +
-        `Try setting a larger target size, or switch to WEBP for better compression.`
-      );
+      showStatus(
+  'warn',
+  `⚠ Target size cannot be reached at the current resolution.\n` +
+  `Smallest result: ${fmt(minBlob.size)}\n` +
+  `Try a larger target or use WEBP.`
+);
       finalize(minBlob, origSize);
     } else {
       const pct = Math.round((1 - bestBlob.size / origSize) * 100);
@@ -340,7 +374,9 @@ function finalize(blob, origSize) {
     const saved = origSize - blob.size;
     const sv = document.getElementById('statSaved');
     sv.textContent = saved > 0 ? fmt(saved) : '+' + fmt(Math.abs(saved));
-    sv.style.color = saved > 0 ? 'var(--accent)' : 'var(--accent2)';
+    sv.style.color = saved > 0
+  ? 'var(--success)'
+  : 'var(--danger)';
     const ext = currentFormat === 'image/jpeg'
   ? 'jpg'
   : currentFormat === 'image/webp'
@@ -350,11 +386,15 @@ function finalize(blob, origSize) {
 const base = originalFile.name.replace(/\.[^.]+$/, '');
 const sizeLabel = fmt(blob.size);
 
-const url = URL.createObjectURL(blob);
+if (currentDownloadURL) {
+  URL.revokeObjectURL(currentDownloadURL);
+}
+
+currentDownloadURL = URL.createObjectURL(blob);
 
 const dl = document.getElementById('downloadBtn');
 
-dl.href = url;
+dl.href = currentDownloadURL;
 dl.download = `qify squished ${sizeLabel} ${base}.${ext}`;
     document.getElementById('resultCard').classList.add('visible');
   }, 300);
@@ -389,6 +429,11 @@ function showProgress(pct, lbl) {
 function hideProgress() { document.getElementById('progressWrap').classList.remove('visible'); }
 
 function resetTool() {
+
+  if (currentDownloadURL) {
+  URL.revokeObjectURL(currentDownloadURL);
+  currentDownloadURL = null;
+}
   originalFile = null; originalDataURL = null;
   fileInput.value = '';
   document.getElementById('controls').classList.remove('visible');
